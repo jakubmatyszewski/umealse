@@ -1,0 +1,18 @@
+services:
+  app:
+    build: .
+    container_name: umealse
+    command: uvicorn src.main:app --host 0.0.0.0 --port 80 --reload
+    ports:
+      - 8080:80
+    volumes:
+      - .:/app
+
+  mongodb:
+    image: mongo:6.0.2
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${DB_USER}"
+      MONGO_INITDB_ROOT_PASSWORD: "${DB_PASSWORD}"
+    ports:
+      - "${DB_PORT}:27017"
