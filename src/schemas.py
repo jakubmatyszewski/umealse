@@ -2,7 +2,7 @@
 from beanie import PydanticObjectId
 from fastapi_users import schemas
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
 
 
@@ -22,7 +22,7 @@ class EventRead:
     pass
 
 
-class EventCreate(BaseModel):
+class EventCreateUpdate(BaseModel):
     """Schema dedicated to creating an event."""
 
     owner: str
@@ -31,10 +31,7 @@ class EventCreate(BaseModel):
     event_name: str
     private: bool = False
     recipy_url: Optional[str] = ""
-
-
-class EventUpdate:
-    pass
+    attendants: List[str] = []
 
 
 class EventDelete:

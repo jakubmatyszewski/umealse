@@ -8,7 +8,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from fastapi_users.db import BeanieBaseUser, BeanieUserDatabase
 from mongomock_motor import AsyncMongoMockClient
-from typing import Optional
+from typing import Optional, List
 
 load_dotenv()
 
@@ -30,13 +30,13 @@ database = client[DB_NAME]
 
 
 class User(BeanieBaseUser[PydanticObjectId]):
-    """User model for db, inheriting base fields from FastAPI Users module."""
+    """DB User model, inheriting base fields from FastAPI Users module."""
 
     username: str
 
 
 class Event(Document):
-    """Event model for db."""
+    """DB Event model."""
 
     owner: str
     datetime: Optional[datetime]
@@ -44,6 +44,7 @@ class Event(Document):
     event_name: str
     private: bool
     recipy_url: Optional[str]
+    attendants: List = []
 
     class Settings:
         name = "Event"
