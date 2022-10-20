@@ -2,10 +2,12 @@
 from fastapi import APIRouter
 from fastapi.openapi.docs import get_swagger_ui_html
 from src.api.v1.users import user_router
+from src.api.v1.events import event_router
 
 api_router = APIRouter()
 
 api_router.include_router(user_router)
+api_router.include_router(event_router)
 
 
 @api_router.get("/docs", include_in_schema=False)

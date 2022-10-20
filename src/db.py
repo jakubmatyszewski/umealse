@@ -3,9 +3,12 @@ Module for db connection.
 """
 import os
 import motor.motor_asyncio
-from beanie import PydanticObjectId
-from fastapi_users.db import BeanieBaseUser, BeanieUserDatabase
+from beanie import Document, PydanticObjectId
+from datetime import datetime
 from dotenv import load_dotenv
+from fastapi_users.db import BeanieBaseUser, BeanieUserDatabase
+from mongomock_motor import AsyncMongoMockClient
+from typing import Optional
 
 load_dotenv()
 
@@ -19,13 +22,31 @@ database_url = f"mongodb://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}"
 client = motor.motor_asyncio.AsyncIOMotorClient(
     database_url, uuidRepresentation="standard"
 )
-database = client[DB_NAME]
+
 if "TESTING" in os.environ.keys():
-    database = client["TEST"]
+    client = AsyncMongoMockClient()
+
+database = client[DB_NAME]
 
 
 class User(BeanieBaseUser[PydanticObjectId]):
-    """User model for db inheriting base fields from FastAPI Users."""
+    """User model for db, inheriting base fields from FastAPI Users module."""
+
+    username: str
+
+
+class Event(Document):
+    """Event model for db."""
+
+    owner: str
+    datetime: Optional[datetime]
+    description: str
+    event_name: str
+    private: bool
+    recipy_url: Optional[str]
+
+    class Settings:
+        name = "Event"
 
 
 async def get_user_db():

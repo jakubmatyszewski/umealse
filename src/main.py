@@ -2,7 +2,7 @@
 from beanie import init_beanie
 from fastapi import FastAPI
 
-from src.db import User, database
+from src.db import Event, User, database
 from src.api.api import api_router
 
 app = FastAPI()
@@ -15,7 +15,5 @@ async def on_startup():
     """Inits db on startup."""
     await init_beanie(
         database=database,
-        document_models=[
-            User,
-        ],
+        document_models=[User, Event],
     )
