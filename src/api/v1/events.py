@@ -9,7 +9,7 @@ from fastapi import Depends
 from src.db import Event, User
 from src.schemas import EventCreateUpdate
 from src.utils import Status, StatusMessage
-from typing import Union
+from typing import Union, List
 
 event_router = APIRouter()
 
@@ -45,7 +45,7 @@ def new_event_validator(data: EventCreateUpdate, user: User) -> StatusMessage:
     return StatusMessage(status=Status.OK, message="Validation successfull.")
 
 
-@event_router.post("/event/add")
+@event_router.post("/events/add")
 async def add_event(
     data: EventCreateUpdate,
     response: Response,
@@ -72,7 +72,7 @@ async def add_event(
     return StatusMessage(status=Status.OK, message=f"Event created. id: {output.id}")
 
 
-@event_router.get("/event/{id}", status_code=200)
+@event_router.get("/events/{id}", status_code=200)
 async def get_event(
     id: str, response: Response, user: User = Depends(current_active_user)
 ) -> Union[Event, StatusMessage]:
@@ -92,7 +92,20 @@ async def get_event(
     return event
 
 
-@event_router.put("/event/{id}", status_code=200)
+@event_router.get("/events/list/{page}", status_code=200)
+async def get_event_list(
+    page: int,
+    user: User = Depends(current_active_user),
+) -> List[Event]:
+    """Get list of events."""
+
+    limit = 10
+    skip = page * limit
+    events = await Event.find({}, skip=skip, limit=limit, sort="datetime").to_list()
+    return events
+
+
+@event_router.put("/events/{id}", status_code=200)
 async def update_event(
     id: str,
     data: EventCreateUpdate,
@@ -119,7 +132,7 @@ async def update_event(
     return event
 
 
-@event_router.delete("/event/{id}", status_code=200)
+@event_router.delete("/events/{id}", status_code=200)
 async def delete_event(
     id: str, response: Response, user: User = Depends(current_active_user)
 ) -> StatusMessage:
