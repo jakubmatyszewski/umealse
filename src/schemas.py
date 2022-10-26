@@ -9,9 +9,13 @@ from pydantic import BaseModel
 class UserRead(schemas.BaseUser[PydanticObjectId]):
     """Provides the basic fields and validation."""
 
+    nickname: str
+
 
 class UserCreate(schemas.BaseUserCreate):
     """Dedicated to user registration. Consists of compulsory email and password fields."""
+
+    nickname: str
 
 
 class UserUpdate(schemas.BaseUserUpdate):

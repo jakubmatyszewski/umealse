@@ -33,7 +33,7 @@ async def get_event_by_id(id: str) -> Union[Event, StatusMessage]:
 
 def new_event_validator(data: EventCreateUpdate, user: User) -> StatusMessage:
     """Set of rules to ensure correct data is passed while creating an event."""
-    if user.username != data.owner:
+    if user.nickname != data.owner:
         return StatusMessage(
             status=Status.ERROR, message="Current user must be an Event owner."
         )
@@ -55,6 +55,7 @@ async def add_event(
 
     validation = new_event_validator(data, user)
     if validation.status != Status.OK:
+        response.status_code = status.HTTP_400_BAD_REQUEST
         return validation
 
     event = Event(
@@ -88,6 +89,9 @@ async def get_event(
                     status=Status.ERROR,
                     message=f"User not authorized to access this event.",
                 )
+    else:
+        response.status_code = status.HTTP_400_BAD_REQUEST
+
     # Output is either Event or error
     return event
 
@@ -141,7 +145,7 @@ async def delete_event(
     event = await get_event_by_id(id)
 
     if isinstance(event, Event):
-        if user.username != event.owner:
+        if user.nickname != event.owner:
             response.status_code = status.HTTP_401_UNAUTHORIZED
             return StatusMessage(
                 status=Status.ERROR, message="Current user must be an Event owner."

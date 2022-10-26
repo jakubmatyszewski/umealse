@@ -14,7 +14,7 @@ from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
 
 from src.db import User, get_user_db
 
-SECRET = os.getenv("SECRET")
+SECRET = os.getenv("SECRET", default='')
 
 
 class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
