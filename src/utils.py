@@ -1,7 +1,7 @@
 """Utilities"""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict
+from typing import Any, Dict, Optional
 
 class Status(Enum):
     """Enum class for consistent status codes."""
@@ -16,6 +16,7 @@ class StatusMessage:
 
     status: Status
     message: str
+    data: Optional[Any] = None
 
     def info(self) -> Dict[str, str]:
         return {"status": self.status.value, "message": self.message}
