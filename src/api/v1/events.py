@@ -7,7 +7,7 @@ from fastapi import APIRouter, Response, status
 from src.users import current_active_user
 from fastapi import Depends
 from src.db import Event, User
-from src.schemas import EventCreateUpdate
+from src.schemas import EventCreate, EventUpdate
 from src.utils import Status, StatusMessage
 from typing import Union, List
 
@@ -31,7 +31,7 @@ async def get_event_by_id(id: str) -> Union[Event, StatusMessage]:
     )
 
 
-def new_event_validator(data: EventCreateUpdate, user: User) -> StatusMessage:
+def new_event_validator(data: Union[EventCreate, EventUpdate], user: User) -> StatusMessage:
     """Set of rules to ensure correct data is passed while creating an event."""
     if user.nickname != data.owner:
         return StatusMessage(
@@ -40,14 +40,14 @@ def new_event_validator(data: EventCreateUpdate, user: User) -> StatusMessage:
     dt = data.datetime.replace(tzinfo=None)
     if dt - datetime.now() < timedelta(0):
         return StatusMessage(
-            status=Status.ERROR, message="Unable to create Event in the past."
+            status=Status.ERROR, message="Event can not happen in the past."
         )
     return StatusMessage(status=Status.OK, message="Validation successfull.")
 
 
 @event_router.post("/events/add")
 async def add_event(
-    data: EventCreateUpdate,
+    data: EventCreate,
     response: Response,
     user: User = Depends(current_active_user),
 ) -> StatusMessage:
@@ -112,28 +112,28 @@ async def get_event_list(
 @event_router.put("/events/{id}", status_code=200)
 async def update_event(
     id: str,
-    data: EventCreateUpdate,
+    data: EventUpdate,
     response: Response,
     user: User = Depends(current_active_user),
 ) -> StatusMessage:
     """Update an event."""
-    event = await get_event_by_id(id)
+    get_event_output = await get_event_by_id(id)
     validation = new_event_validator(data, user)
     if validation.status != Status.OK:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return validation
 
-    if isinstance(event, Event):
+    if isinstance(get_event_output, Event):
         data_dict = data.dict()
         for key in data_dict.keys():
             new_value = getattr(data, key)
-            setattr(event, key, new_value)
+            setattr(get_event_output, key, new_value)
 
-        await event.save()
-        return StatusMessage(status=Status.OK, message=f"Event updated")
+        await get_event_output.save()
+        return StatusMessage(status=Status.OK, message=f"Event updated", data=get_event_output)
 
     response.status_code = status.HTTP_400_BAD_REQUEST
-    return event
+    return get_event_output
 
 
 @event_router.delete("/events/{id}", status_code=200)
@@ -142,13 +142,15 @@ async def delete_event(
 ) -> StatusMessage:
     """Delete an event."""
 
-    event = await get_event_by_id(id)
+    get_event_output = await get_event_by_id(id)
 
-    if isinstance(event, Event):
-        if user.nickname != event.owner:
+    if isinstance(get_event_output, Event):
+        if user.nickname != get_event_output.owner:
             response.status_code = status.HTTP_401_UNAUTHORIZED
             return StatusMessage(
                 status=Status.ERROR, message="Current user must be an Event owner."
             )
         return StatusMessage(status=Status.OK, message=f"Event {id} deleted.")
-    return event
+
+    response.status_code = status.HTTP_400_BAD_REQUEST
+    return get_event_output

@@ -22,11 +22,7 @@ class UserUpdate(schemas.BaseUserUpdate):
     """Dedicated to user profile update."""
 
 
-class EventRead:
-    pass
-
-
-class EventCreateUpdate(BaseModel):
+class EventCreate(BaseModel):
     """Schema dedicated to creating an event."""
 
     owner: str
@@ -37,6 +33,7 @@ class EventCreateUpdate(BaseModel):
     recipy_url: Optional[str] = ""
     attendants: List[str] = []
 
+class EventUpdate(EventCreate):
+    """Schema dedicated to updating an event."""
 
-class EventDelete:
-    pass
+    id: Optional[str]
