@@ -40,6 +40,3 @@ async def user_logged_in(test_client: AsyncClient):
     creds = {"username": data["email"], "password": data["password"]}
 
     return creds
-
-
-environ["TESTING"] = "TRUE"
